@@ -2,11 +2,8 @@
 
 releases:
 	boon build . --target all
-
-build:
-	zip -9 -r Breakout.love README.md fonts graphics images \
-				lib sounds src main.lua
+	zip -q -9 -r "release/Breakout CS50G-macOS.zip" "release/Breakout CS50G.app"
 
 clean:
-	rm -f Breakout.love
+	rm -f release/*
 
