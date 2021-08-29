@@ -80,8 +80,8 @@ function Ball:update(dt)
             gSounds['wall-hit']:play()
         end
 
-        if self.x >= VIRTUAL_WIDTH - 8 then
-            self.x = VIRTUAL_WIDTH - 8
+        if self.x >= VIRTUAL_WIDTH - self.width then
+            self.x = VIRTUAL_WIDTH - self.width
             self.dx = -self.dx
             gSounds['wall-hit']:play()
         end

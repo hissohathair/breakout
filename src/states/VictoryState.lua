@@ -29,7 +29,7 @@ function VictoryState:update(dt)
     -- have the ball track the player
     for k, ball in pairs(self.balls) do
         ball.x = self.paddle.x + (self.paddle.width / 2) - 4
-        ball.y = self.paddle.y - 8
+        ball.y = self.paddle.y - ball.height
     end
 
     -- go to play screen if the player presses Enter

@@ -77,7 +77,7 @@ function PlayState:update(dt)
     for k, ball in pairs(self.balls) do
         if ball:collides(self.paddle) then
             -- raise ball above paddle in case it goes below it, then reverse dy
-            ball.y = self.paddle.y - 8
+            ball.y = self.paddle.y - ball.height
             ball.dy = -ball.dy
 
             --
@@ -86,11 +86,11 @@ function PlayState:update(dt)
 
             -- if we hit the paddle on its left side while moving left...
             if ball.x < self.paddle.x + (self.paddle.width / 2) and self.paddle.dx < 0 then
-                ball.dx = -50 + -(8 * (self.paddle.x + self.paddle.width / 2 - ball.x))
+                ball.dx = -50 + -(ball.width * (self.paddle.x + self.paddle.width / 2 - ball.x))
             
             -- else if we hit the paddle on its right side while moving right...
             elseif ball.x > self.paddle.x + (self.paddle.width / 2) and self.paddle.dx > 0 then
-                ball.dx = 50 + (8 * math.abs(self.paddle.x + self.paddle.width / 2 - ball.x))
+                ball.dx = 50 + (ball.width * math.abs(self.paddle.x + self.paddle.width / 2 - ball.x))
             end
 
             gSounds['paddle-hit']:play()
@@ -113,7 +113,7 @@ function PlayState:update(dt)
                 -- sometimes, a brick will spawn a power up
                 if math.random(3) == 1 then
                     if not self.powerup then
-                        self.powerup = Powerup(brick.x + brick.width / 2 - 8, brick.y)
+                        self.powerup = Powerup(brick.x + brick.width / 2 - 8 / 2, brick.y)
                     elseif not self.powerup.inPlay then
                         self.powerup:reset(brick)
                     end
@@ -161,7 +161,7 @@ function PlayState:update(dt)
                     
                     -- flip x velocity and reset position outside of brick
                     ball.dx = -ball.dx
-                    ball.x = brick.x - 8
+                    ball.x = brick.x - ball.width
                 
                 -- right edge; only check if we're moving left, , and offset the check by a couple of pixels
                 -- so that flush corner hits register as Y flips, not X flips
@@ -176,7 +176,7 @@ function PlayState:update(dt)
                     
                     -- flip y velocity and reset position outside of brick
                     ball.dy = -ball.dy
-                    ball.y = brick.y - 8
+                    ball.y = brick.y -  ball.height
                 
                 -- bottom edge if no X collisions or top collision, last possibility
                 else
