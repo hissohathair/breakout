@@ -36,8 +36,7 @@ function PlayState:enter(params)
     self.balls[1].dy = math.random(-50, -60)
 
     -- no powerups in play yet
-    self.powerup = Powerup(VIRTUAL_WIDTH / 2, 0)
-    self.powerup.inPlay = false
+    self.powerup = nil
 end
 
 function PlayState:update(dt)
@@ -52,6 +51,12 @@ function PlayState:update(dt)
         self.paused = true
         gSounds['pause']:play()
         return
+    elseif love.keyboard.wasPressed('m') then
+        if gSounds['music']:isPlaying() then
+            gSounds['music']:pause()
+        else
+            gSounds['music']:play()
+        end
     end
 
     -- update positions based on velocity
@@ -61,9 +66,9 @@ function PlayState:update(dt)
     end
 
     -- update powerup if in play
-    if self.powerup and self.powerup.inPlay then
+    if self.powerup then
         self.powerup:update(dt)
-        if self.powerup:collides(self.paddle) then
+        if self.powerup.inPlay and self.powerup:collides(self.paddle) then
             self.balls = self.powerup:hit(self.paddle, self.balls)
         end
     end
@@ -106,8 +111,12 @@ function PlayState:update(dt)
                 brick:hit()
 
                 -- sometimes, a brick will spawn a power up
-                if math.random(3) == 1 and not self.powerup.inPlay then
-                    self.powerup:reset(brick)
+                if math.random(3) == 1 then
+                    if not self.powerup then
+                        self.powerup = Powerup(brick.x + brick.width / 2 - 8, brick.y)
+                    elseif not self.powerup.inPlay then
+                        self.powerup:reset(brick)
+                    end
                 end
 
                 -- if we have enough points, recover a point of health
@@ -245,7 +254,7 @@ function PlayState:render()
     end
 
     -- render powerup if present
-    if self.powerup and self.powerup.inPlay then
+    if self.powerup then
         self.powerup:render()
     end
 

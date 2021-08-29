@@ -27,6 +27,22 @@ function Powerup:init(x, y)
     self.dy = POWERUP_SPEED
     self.inPlay = true 
     self.skin = 9 -- 9th powerup sprite (see Util.lua)
+
+    -- particle system for when powerup hits paddle
+    self.psystem = love.graphics.newParticleSystem(gTextures['particle'], 64)
+
+    -- lasts between 0.5-1 seconds seconds
+    self.psystem:setParticleLifetime(0.5, 1.0)
+
+    -- give it an acceleration of anywhere between X1,Y1 and X2,Y2
+    -- had these different to the settings in Ball.lua but it didn't look good
+    self.psystem:setLinearAcceleration(-15, 0, 15, 80)
+
+    -- spread of particles; normal looks more natural than uniform
+    self.psystem:setEmissionArea('normal', 10, 10)
+
+    -- Fade to from blue to clear
+    self.psystem:setColors(0.4, 0.6, 1.0, 0.5, 0.4, 0.6, 1.0, 0.0) 
 end
 
 --[[
@@ -73,6 +89,7 @@ function Powerup:hit(paddle, orig_balls)
     -- register the hit
     self.inPlay = false
     gSounds['powerup']:play()
+    self.psystem:emit(64)
 
     -- execute the powerup (2 new balls, flying off randomly)
     local balls = { Ball(), Ball() }
@@ -97,21 +114,28 @@ function Powerup:hit(paddle, orig_balls)
 end
 
 function Powerup:update(dt)
-    -- fall and spin
-    self.y = self.y + self.dy * dt
-    self.rotation = self.rotation + ROTATION_SPEED * dt
-    if self.rotation > math.pi * 2 then
-        self.rotation = 0 
-    end
+    if self.inPlay then
+        -- fall and spin
+        self.y = self.y + self.dy * dt
+        self.rotation = self.rotation + ROTATION_SPEED * dt
+        if self.rotation > math.pi * 2 then
+            self.rotation = 0 
+        end
 
-    -- powerup goes out of play once it drops off screen
-    if self.y > VIRTUAL_HEIGHT then
-        self.inPlay = false
+        -- powerup goes out of play once it drops off screen
+        if self.y > VIRTUAL_HEIGHT then
+            self.inPlay = false
+        end
+    else
+        self.psystem:update(dt)
     end
 end
 
 function Powerup:render()
-    love.graphics.draw(gTextures['main'], gFrames['powerups'][self.skin],
-        self.x, self.y, self.rotation)
+    if self.inPlay then
+        love.graphics.draw(gTextures['main'], gFrames['powerups'][self.skin],
+            self.x, self.y, self.rotation)
+    else
+        love.graphics.draw(self.psystem, self.x, self.y + self.height / 2)
+    end
 end
-
