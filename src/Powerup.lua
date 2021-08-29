@@ -16,6 +16,10 @@ Powerup = Class{}
 local POWERUP_SPEED = 30
 local ROTATION_SPEED = 0.35
 
+--[[
+    Create a power powerup. Will randomly select the powerup type
+    (currently either 3 or 9)
+]]
 function Powerup:init(x, y)
     self.x = x
     self.y = y
@@ -26,7 +30,7 @@ function Powerup:init(x, y)
     self.rotation = 0
     self.dy = POWERUP_SPEED
     self.inPlay = true 
-    self.skin = 9 -- 9th powerup sprite (see Util.lua)
+    self.skin = math.random(2) == 1 and 3 or 9
 
     -- particle system for when powerup hits paddle
     self.psystem = love.graphics.newParticleSystem(gTextures['particle'], 64)
@@ -54,7 +58,7 @@ function Powerup:reset(brick)
     self.rotation = 0
     self.dy = POWERUP_SPEED
     self.inPlay = true 
-    self.skin = 9
+    self.skin = math.random(2) == 1 and 3 or 9
 end
 
 --[[
@@ -83,35 +87,44 @@ end
 
 --[[
     Called when the player hits the powerup with their paddle. Currently only
-    skip #9 is supported -- this spawns more balls from the paddle.
+    skips #3 & #9 are supported -- this spawns more balls from the paddle.
 ]]
-function Powerup:hit(paddle, orig_balls)
+function Powerup:hit(playState)
     -- register the hit
     self.inPlay = false
     gSounds['powerup']:play()
     self.psystem:emit(64)
 
-    -- execute the powerup (2 new balls, flying off randomly)
-    local balls = { Ball(), Ball() }
-    for k, ball in pairs(balls) do
-        -- ball spawns at players paddle
-        ball.skin = math.random(7)
-        ball.x = paddle.x + (paddle.width / 2) - (ball.width / 2)
-        ball.y = paddle.y - ball.height
+    -- execute the powerup based on skin
+    if 3 == self.skin then
+        -- add new life
+        playState.health = math.min(3, playState.health + 1)
+        gSounds['recover']:play()
 
-        -- ball flies off in randomish direction
-        ball.dx = math.random(-200, 200)
-        ball.dy = math.random(-50, -60)
-    end
+    elseif 9 == self.skin then
+        -- 2 new balls, flying off randomly
+        local balls = { Ball(), Ball() }
+        for k, ball in pairs(balls) do
+            -- ball spawns at players paddle
+            ball.skin = math.random(7)
+            ball.x = playState.paddle.x + (playState.paddle.width / 2) - (ball.width / 2)
+            ball.y = playState.paddle.y - ball.height
 
-    -- merge in the list of original balls
-    i = 3
-    for k, ball in pairs(orig_balls) do
-        balls[i] = ball
-        i = i + 1
+            -- ball flies off in randomish direction
+            ball.dx = math.random(-200, 200)
+            ball.dy = math.random(-50, -60)
+        end
+
+        -- merge in the list of original balls
+        i = 3
+        for k, ball in pairs(playState.balls) do
+            balls[i] = ball
+            i = i + 1
+        end
+        playState.balls = balls
     end
-    return balls
 end
+
 
 function Powerup:update(dt)
     if self.inPlay then

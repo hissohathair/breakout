@@ -69,7 +69,7 @@ function PlayState:update(dt)
     if self.powerup then
         self.powerup:update(dt)
         if self.powerup.inPlay and self.powerup:collides(self.paddle) then
-            self.balls = self.powerup:hit(self.paddle, self.balls)
+            self.powerup:hit(self)
         end
     end
 
