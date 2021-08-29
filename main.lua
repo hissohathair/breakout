@@ -90,6 +90,7 @@ function love.load()
         ['brick-hit-1'] = love.audio.newSource('sounds/brick-hit-1.wav', 'static'),
         ['brick-hit-2'] = love.audio.newSource('sounds/brick-hit-2.wav', 'static'),
         ['hurt'] = love.audio.newSource('sounds/hurt.wav', 'static'),
+        ['hurt2'] = love.audio.newSource('sounds/hurt2.wav', 'static'),
         ['victory'] = love.audio.newSource('sounds/victory.wav', 'static'),
         ['recover'] = love.audio.newSource('sounds/recover.wav', 'static'),
         ['high-score'] = love.audio.newSource('sounds/high_score.wav', 'static'),

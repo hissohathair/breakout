@@ -16,7 +16,7 @@ Powerup = Class{}
 local POWERUP_SPEED = 30
 local ROTATION_SPEED = 0.35
 
-local POWERUPS_AVAILABLE = { 1, 2, 3, 9 }
+local POWERUPS_AVAILABLE = { 1, 2, 3, 4, 9 }
 
 --[[
     Create a power powerup. Will randomly select the powerup type
@@ -94,21 +94,27 @@ end
 function Powerup:hit(playState)
     -- register the hit
     self.inPlay = false
-    gSounds['powerup']:play()
     self.psystem:emit(64)
 
     -- execute the powerup based on skin
     if 3 == self.skin then
         -- add new life
-        playState.health = math.min(3, playState.health + 1)
         gSounds['recover']:play()
+        playState.health = math.min(3, playState.health + 1)
+
+    elseif 4 == self.skin then
+        -- takes a life, but doesn't take the last one
+        gSounds['hurt2']:play()
+        playState.health = math.max(1, playState.health - 1)
 
     elseif 1 == self.skin then
         -- removes all balls except the first one
+        gSounds['hurt2']:play()        
         playState.balls = { playState.balls[1] }
 
     elseif 2 == self.skin then
         -- splits all balls into 2
+        gSounds['powerup']:play()
         local balls = { }
         local i = 1
         for k, ball in pairs(playState.balls) do
@@ -134,6 +140,7 @@ function Powerup:hit(playState)
 
     elseif 9 == self.skin then
         -- 2 new balls, flying off randomly
+        gSounds['powerup']:play()
         local balls = { }
 
         -- first, copy over the ones currently in play
@@ -162,6 +169,11 @@ function Powerup:hit(playState)
 
         -- save the new list
         playState.balls = balls
+
+    else
+        -- a powerup we haven't handled! Let's just give points...
+        gSounds['powerup']:play()
+        playState.score = playState.score + 250
     end
 end
 
