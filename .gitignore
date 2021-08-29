@@ -41,3 +41,5 @@ luac.out
 
 # OS clutter
 *.DS_Store
+*.swp
+Breakout.love
