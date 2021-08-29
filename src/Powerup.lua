@@ -16,7 +16,7 @@ Powerup = Class{}
 local POWERUP_SPEED = 30
 local ROTATION_SPEED = 0.35
 
-local POWERUPS_AVAILABLE = { 2, 3, 9 }
+local POWERUPS_AVAILABLE = { 1, 2, 3, 9 }
 
 --[[
     Create a power powerup. Will randomly select the powerup type
@@ -103,9 +103,38 @@ function Powerup:hit(playState)
         playState.health = math.min(3, playState.health + 1)
         gSounds['recover']:play()
 
-    elseif 9 == self.skin or 2 == self.skin then
+    elseif 1 == self.skin then
+        -- removes all balls except the first one
+        playState.balls = { playState.balls[1] }
+
+    elseif 2 == self.skin then
+        -- splits all balls into 2
+        local balls = { }
+        local i = 1
+        for k, ball in pairs(playState.balls) do
+            if ball.inPlay then
+                -- copy existing ball
+                balls[i] = ball
+
+                -- clone that ball, but have it go in opposite dx and always up
+                newbie = Ball(ball.skin)
+                newbie.x = ball.x
+                newbie.y = ball.y 
+                newbie.dx = -ball.dx
+                newbie.dy = math.abs(ball.dy) * -1
+            
+                -- add to the list
+                balls[i + 1] = newbie
+                i = i + 2
+            end
+        end
+
+        -- save the new list
+        playState.balls = balls 
+
+    elseif 9 == self.skin then
         -- 2 new balls, flying off randomly
-        local balls = {}
+        local balls = { }
 
         -- first, copy over the ones currently in play
         local i = 1
@@ -116,10 +145,9 @@ function Powerup:hit(playState)
             end
         end
 
-        local max_new_balls = self.skin == 9 and 2 or 24
-        for k = i, i + max_new_balls do
+        local new_balls = { Ball(), Ball() }
+        for k, ball in pairs(new_balls) do
             -- ball spawns at players paddle
-            local ball = Ball()
             ball.skin = math.random(7)
             ball.x = playState.paddle.x + (playState.paddle.width / 2) - (ball.width / 2)
             ball.y = playState.paddle.y - ball.height
