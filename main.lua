@@ -52,7 +52,7 @@ function love.load()
 
     -- load up the graphics we'll be using throughout our states
     gTextures = {
-        ['background'] = love.graphics.newImage('graphics/background.png'),
+        ['background'] = love.graphics.newImage('graphics/redplanet2.png'),
         ['main'] = love.graphics.newImage('graphics/breakout.png'),
         ['arrows'] = love.graphics.newImage('graphics/arrows.png'),
         ['hearts'] = love.graphics.newImage('graphics/hearts.png'),
@@ -96,7 +96,7 @@ function love.load()
         ['pause'] = love.audio.newSource('sounds/pause.wav', 'static'),
         ['powerup'] = love.audio.newSource('sounds/powerup.wav', 'static'),
 
-        ['music'] = love.audio.newSource('sounds/music.wav', 'static')
+        ['music'] = love.audio.newSource('sounds/xeon6.ogg', 'static')
     }
 
     -- the state machine we'll be using to transition between various states

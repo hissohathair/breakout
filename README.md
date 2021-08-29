@@ -16,3 +16,9 @@ Assignment:
 
 ![Image of Powerup](images/screenshot1.png)
 
+
+# Credits
+
+* Background image by [Bart Kelsey](https://opengameart.org/users/bart) via [Open Game Art](https://opengameart.org/content/red-planet-2)
+* Music also by [Bart Kelsey](https://opengameart.org/users/bart) via [Open Game Art](https://opengameart.org/content/xeon-theme-remastered)
+
