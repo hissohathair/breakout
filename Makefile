@@ -1,7 +1,7 @@
 # Makefile for building Love artefacts
 
-release:
-	boon build .
+releases:
+	boon build . --target all
 
 build:
 	zip -9 -r Breakout.love README.md fonts graphics images \
