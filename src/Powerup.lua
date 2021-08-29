@@ -16,6 +16,8 @@ Powerup = Class{}
 local POWERUP_SPEED = 30
 local ROTATION_SPEED = 0.35
 
+local POWERUPS_AVAILABLE = { 2, 3, 9 }
+
 --[[
     Create a power powerup. Will randomly select the powerup type
     (currently either 3 or 9)
@@ -30,7 +32,7 @@ function Powerup:init(x, y)
     self.rotation = 0
     self.dy = POWERUP_SPEED
     self.inPlay = true 
-    self.skin = math.random(2) == 1 and 3 or 9
+    self.skin = POWERUPS_AVAILABLE[math.random(3)]
 
     -- particle system for when powerup hits paddle
     self.psystem = love.graphics.newParticleSystem(gTextures['particle'], 64)
@@ -58,7 +60,7 @@ function Powerup:reset(brick)
     self.rotation = 0
     self.dy = POWERUP_SPEED
     self.inPlay = true 
-    self.skin = math.random(2) == 1 and 3 or 9
+    self.skin = POWERUPS_AVAILABLE[math.random(3)]
 end
 
 --[[
@@ -101,11 +103,23 @@ function Powerup:hit(playState)
         playState.health = math.min(3, playState.health + 1)
         gSounds['recover']:play()
 
-    elseif 9 == self.skin then
+    elseif 9 == self.skin or 2 == self.skin then
         -- 2 new balls, flying off randomly
-        local balls = { Ball(), Ball() }
-        for k, ball in pairs(balls) do
+        local balls = {}
+
+        -- first, copy over the ones currently in play
+        local i = 1
+        for k, ball in pairs(playState.balls) do
+            if ball.inPlay then
+                balls[i] = ball
+                i = i + 1
+            end
+        end
+
+        local max_new_balls = self.skin == 9 and 2 or 24
+        for k = i, i + max_new_balls do
             -- ball spawns at players paddle
+            local ball = Ball()
             ball.skin = math.random(7)
             ball.x = playState.paddle.x + (playState.paddle.width / 2) - (ball.width / 2)
             ball.y = playState.paddle.y - ball.height
@@ -113,14 +127,12 @@ function Powerup:hit(playState)
             -- ball flies off in randomish direction
             ball.dx = math.random(-200, 200)
             ball.dy = math.random(-50, -60)
-        end
 
-        -- merge in the list of original balls
-        i = 3
-        for k, ball in pairs(playState.balls) do
             balls[i] = ball
             i = i + 1
         end
+
+        -- save the new list
         playState.balls = balls
     end
 end
@@ -136,7 +148,7 @@ function Powerup:update(dt)
         end
 
         -- powerup goes out of play once it drops off screen
-        if self.y > VIRTUAL_HEIGHT then
+        if self.y > VIRTUAL_HEIGHT + self.height then
             self.inPlay = false
         end
     else
