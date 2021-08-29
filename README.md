@@ -12,9 +12,11 @@ Assignment:
 
 # Screenshots
 
-## Powerup
+## Powerups
 
 ![Image of Powerup](images/screenshot1.png)
+
+![Image of Powerup](images/screenshot2.png)
 
 
 # Credits
