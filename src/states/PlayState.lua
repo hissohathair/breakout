@@ -111,8 +111,7 @@ function PlayState:update(dt)
                 brick:hit()
 
                 -- sometimes, a brick will spawn a power up
-                -- TODO: lower the probability of a powerup spawning
-                if math.random(2) == 1 then
+                if math.random(3) == 1 then
                     if not self.powerup then
                         self.powerup = Powerup(brick.x + brick.width / 2 - 8, brick.y)
                     elseif not self.powerup.inPlay then
