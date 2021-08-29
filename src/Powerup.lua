@@ -17,6 +17,32 @@ local POWERUP_SPEED = 30
 local ROTATION_SPEED = 0.35
 
 local POWERUPS_AVAILABLE = { 1, 2, 3, 4, 9 }
+local NUM_POWERUPS = 5
+
+
+local paletteColors = {
+    -- red X
+    [1] = { ['r'] = 217 / 255, ['g'] = 87 / 255, ['b'] = 99 / 255 },
+    -- green X
+    [2] = { ['r'] = 106 / 255, ['g'] = 190 / 255, ['b'] = 47 / 255 },
+    -- red heart
+    [3] = { ['r'] = 217 / 255, ['g'] = 87 / 255, ['b'] = 99 / 255 },
+    -- red skull
+    [4] = { ['r'] = 217 / 255, ['g'] = 87 / 255, ['b'] = 99 / 255 },
+    -- gold up
+    [5] = { ['r'] = 251 / 255, ['g'] = 242 / 255, ['b'] = 54 / 255 },
+    -- gold down
+    [6] = { ['r'] = 251 / 255, ['g'] = 242 / 255, ['b'] = 54 / 255 },
+    -- blue small ball
+    [7] = { ['r'] = 99 / 255, ['g'] = 155 / 255, ['b'] = 255 / 255 },
+    -- blue big ball
+    [8] = { ['r'] = 99 / 255, ['g'] = 155 / 255, ['b'] = 255 / 255 },
+    -- blue plus ball
+    [9] = { ['r'] = 99 / 255, ['g'] = 155 / 255, ['b'] = 255 / 255 },
+    -- gold key
+    [6] = { ['r'] = 251 / 255, ['g'] = 242 / 255, ['b'] = 54 / 255 }
+}
+
 
 --[[
     Create a power powerup. Will randomly select the powerup type
@@ -28,11 +54,21 @@ function Powerup:init(x, y)
     self.width = 16
     self.height = 16
 
-    -- on init, begin falling
+    -- on init, reset
+    self:reset(self)
+end
+
+--[[
+    Called when a brick is spawning a new powerup
+]]
+function Powerup:reset(brick)
+    -- reset powerup's position
+    self.x = brick.x + brick.width / 2
+    self.y = brick.y + brick.height / 2
     self.rotation = 0
     self.dy = POWERUP_SPEED
     self.inPlay = true 
-    self.skin = POWERUPS_AVAILABLE[math.random(3)]
+    self.skin = POWERUPS_AVAILABLE[math.random(NUM_POWERUPS)]
 
     -- particle system for when powerup hits paddle
     self.psystem = love.graphics.newParticleSystem(gTextures['particle'], 64)
@@ -48,19 +84,9 @@ function Powerup:init(x, y)
     self.psystem:setEmissionArea('normal', 10, 10)
 
     -- Fade to from blue to clear
-    self.psystem:setColors(0.4, 0.6, 1.0, 0.5, 0.4, 0.6, 1.0, 0.0) 
-end
-
---[[
-    Called when a brick is spawning a new powerup
-]]
-function Powerup:reset(brick)
-    self.x = brick.x + brick.width / 2
-    self.y = brick.y + brick.height / 2
-    self.rotation = 0
-    self.dy = POWERUP_SPEED
-    self.inPlay = true 
-    self.skin = POWERUPS_AVAILABLE[math.random(3)]
+    local n = self.skin
+    self.psystem:setColors(paletteColors[n].r, paletteColors[n].g, paletteColors[n].b, 0.8,
+        paletteColors[n].r, paletteColors[n].g, paletteColors[n].b, 0.0) 
 end
 
 --[[
