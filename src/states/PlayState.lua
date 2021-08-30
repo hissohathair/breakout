@@ -28,6 +28,10 @@ function PlayState:enter(params)
     self.highScores = params.highScores
     self.balls = params.balls
     self.level = params.level
+    self.paused = false
+    self.music_paused = false
+    self.sleep_enabled = love.window.isDisplaySleepEnabled()
+    print(string.format("DEBUG: sleep_enabled=%s", tostring(self.sleep_enabled)))
 
     self.recoverPoints = 5000
 
@@ -40,23 +44,39 @@ function PlayState:enter(params)
 end
 
 function PlayState:update(dt)
+
+    -- Let the user turn music off any time
+    if love.keyboard.wasPressed('m') then
+        if gSounds['music']:isPlaying() then
+            gSounds['music']:pause()
+            self.music_paused = true
+        else
+            gSounds['music']:play()
+            self.music_paused = false
+        end
+    end
+
+    -- Check for pause / unpause conditions
     if self.paused then
         if love.keyboard.wasPressed('space') then
+            -- unpause resumes music only if it was playing when paused, and
+            -- prevents display from sleeping if that was original setting
             self.paused = false
             gSounds['pause']:play()
+            if not self.music_paused then
+                gSounds['music']:play()
+            end
+            love.window.setDisplaySleepEnabled(self.sleep_enabled)
         else
             return
         end
     elseif love.keyboard.wasPressed('space') then
+        -- pausing always pauses music and allows display to sleep
         self.paused = true
         gSounds['pause']:play()
+        gSounds['music']:pause()
+        love.window.setDisplaySleepEnabled(true)
         return
-    elseif love.keyboard.wasPressed('m') then
-        if gSounds['music']:isPlaying() then
-            gSounds['music']:pause()
-        else
-            gSounds['music']:play()
-        end
     end
 
     -- update positions based on velocity
