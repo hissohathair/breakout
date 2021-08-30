@@ -16,8 +16,10 @@ Powerup = Class{}
 local POWERUP_SPEED = 30
 local ROTATION_SPEED = 0.35
 
-local POWERUPS_AVAILABLE = { 1, 2, 3, 4, 9 }
-local NUM_POWERUPS = 5
+local GOOD_POWERUPS = { 2, 3, 9, 10 }
+local BAD_POWERUPS = { 1, 4 }
+local NUM_GOOD = 4
+local NUM_BAD = 2
 
 
 local paletteColors = {
@@ -40,7 +42,7 @@ local paletteColors = {
     -- blue plus ball
     [9] = { ['r'] = 99 / 255, ['g'] = 155 / 255, ['b'] = 255 / 255 },
     -- gold key
-    [6] = { ['r'] = 251 / 255, ['g'] = 242 / 255, ['b'] = 54 / 255 }
+    [10] = { ['r'] = 251 / 255, ['g'] = 242 / 255, ['b'] = 54 / 255 }
 }
 
 
@@ -68,7 +70,13 @@ function Powerup:reset(brick)
     self.rotation = 0
     self.dy = POWERUP_SPEED
     self.inPlay = true 
-    self.skin = POWERUPS_AVAILABLE[math.random(NUM_POWERUPS)]
+
+    -- "good" power ups should spawn more often than "bad" ones
+    if math.random(9) <= 1 then
+        self.skin = BAD_POWERUPS[math.random(NUM_BAD)]
+    else
+        self.skin = GOOD_POWERUPS[math.random(NUM_GOOD)]
+    end
 
     -- particle system for when powerup hits paddle
     self.psystem = love.graphics.newParticleSystem(gTextures['particle'], 64)
@@ -178,9 +186,10 @@ function Powerup:hit(playState)
             end
         end
 
-        local new_balls = { Ball(), Ball() }
-        for k, ball in pairs(new_balls) do
+        local num_new_balls = math.random(100) == 1 and 24 or 2
+        while num_new_balls > 0 do
             -- ball spawns at players paddle
+            ball = Ball()
             ball.skin = math.random(7)
             ball.x = playState.paddle.x + (playState.paddle.width / 2) - (ball.width / 2)
             ball.y = playState.paddle.y - ball.height
@@ -191,6 +200,7 @@ function Powerup:hit(playState)
 
             balls[i] = ball
             i = i + 1
+            num_new_balls = num_new_balls - 1
         end
 
         -- save the new list

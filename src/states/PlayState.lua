@@ -31,7 +31,6 @@ function PlayState:enter(params)
     self.paused = false
     self.music_paused = false
     self.sleep_enabled = love.window.isDisplaySleepEnabled()
-    print(string.format("DEBUG: sleep_enabled=%s", tostring(self.sleep_enabled)))
 
     self.recoverPoints = 5000
 
@@ -54,6 +53,12 @@ function PlayState:update(dt)
             gSounds['music']:play()
             self.music_paused = false
         end
+    end
+
+    -- TODO: Remove. For testing, hit a key to spawn a powerup
+    if love.keyboard.wasPressed('s') then
+        self.powerup = Powerup(self.paddle.x + self.paddle.width / 2, 
+            self.paddle.y - self.paddle.height * 3)
     end
 
     -- Check for pause / unpause conditions
