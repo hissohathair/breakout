@@ -12,11 +12,19 @@ Assignment:
 
 # Screenshots
 
+## Opening Screens
+
+![Title screen](images/titlescreen.png)
+
+![Paddle selection](images/paddleselect.png)
+
+![Level 1 title screen](images/level1.png)
+
 ## Powerups
 
-![Image of Powerup](images/screenshot1.png)
+![Image of Powerup](images/powerup1.png)
 
-![Image of Powerup](images/screenshot2.png)
+![Image of Powerup](images/powerup2.png)
 
 
 # Credits

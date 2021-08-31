@@ -27,6 +27,19 @@
 require 'src/Dependencies'
 
 --[[
+    Called at start-up to override defaults in love.conf
+]]
+function love.conf(t)
+    -- not using these
+    t.modules.joystick = false
+    t.modules.physics = false
+
+    -- set identity
+    t.identity = "Breakout"
+end
+
+
+--[[
     Called just once at the beginning of the game; used to set up
     game objects, variables, etc. and prepare the game world.
 ]]
@@ -125,9 +138,13 @@ function love.load()
         highScores = loadHighScores()
     })
 
-    -- play our music outside of all states and set it to looping
-    gSounds['music']:play()
+    -- play our music outside of all states and set it to looping - but don't
+    -- play music if player is listening to something already
+    -- BUG: Only supported on iOS and Android https://love2d.org/wiki/love.system.hasBackgroundMusic
     gSounds['music']:setLooping(true)
+    if not love.system.hasBackgroundMusic() then
+        gSounds['music']:play()
+    end
 
     -- a table we'll use to keep track of which keys have been pressed this
     -- frame, to get around the fact that LÖVE's default callback won't let us
@@ -154,6 +171,14 @@ end
     across system hardware.
 ]]
 function love.update(dt)
+    -- TODO: Remove. For taking screenshots for doco
+    if love.keyboard.wasPressed('s') then
+        local filename = "Breakout_" .. os.time() .. ".png"
+        love.graphics.captureScreenshot(filename)
+        savedir = love.filesystem.getSaveDirectory()
+        print(string.format("DEBUG: Saved screenshot to '%s/%s'", savedir, filename))
+    end
+
     -- this time, we pass in dt to the state object we're currently using
     gStateMachine:update(dt)
 

@@ -44,7 +44,7 @@ end
 
 function PlayState:update(dt)
 
-    -- Let the user turn music off any time
+    -- Let the user turn music off during game play
     if love.keyboard.wasPressed('m') then
         if gSounds['music']:isPlaying() then
             gSounds['music']:pause()
@@ -56,7 +56,7 @@ function PlayState:update(dt)
     end
 
     -- TODO: Remove. For testing, hit a key to spawn a powerup
-    if love.keyboard.wasPressed('s') then
+    if love.keyboard.wasPressed('x') then
         self.powerup = Powerup(self.paddle.x + self.paddle.width / 2, 
             self.paddle.y - self.paddle.height * 3)
     end
