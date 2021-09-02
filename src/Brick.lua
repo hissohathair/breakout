@@ -60,8 +60,9 @@ function Brick:init(x, y)
     self.width = 32
     self.height = 16
     
-    -- used to determine whether this brick should be rendered
+    -- used to determine whether this brick should be rendered, and is locked
     self.inPlay = true
+    self.isLocked = false 
 
     -- particle system belonging to the brick, emitted on hit
     self.psystem = love.graphics.newParticleSystem(gTextures['particle'], 64)
@@ -84,7 +85,7 @@ end
     Triggers a hit on the brick, taking it out of play if at 0 health or
     changing its color otherwise.
 ]]
-function Brick:hit()
+function Brick:hit(canUnlock)
     -- set the particle system to interpolate between two colors; in this case, we give
     -- it our self.color but with varying alpha; brighter for higher tiers, fading to 0
     -- over the particle's lifetime (the second color)
@@ -100,13 +101,27 @@ function Brick:hit()
     )
     self.psystem:emit(64)
 
-    -- sound on hit
-    gSounds['brick-hit-2']:stop()
-    gSounds['brick-hit-2']:play()
+    -- sound on hit - if the brick is locked, we doink
+    if self.isLocked and canUnlock then
+        gSounds['unlocked']:stop()
+        gSounds['unlocked']:play()
+    elseif self.isLocked then
+        gSounds['brick-hit-locked']:stop()
+        gSounds['brick-hit-locked']:play()
+    else
+        gSounds['brick-hit-2']:stop()
+        gSounds['brick-hit-2']:play()
+    end
 
     -- if we're at a higher tier than the base, we need to go down a tier
     -- if we're already at the lowest color, else just go down a color
-    if self.tier > 0 then
+    if self.isLocked then
+        -- something something dark side
+        if canUnlock then
+            self.isLocked = false
+        end
+
+    elseif self.tier > 0 then
         if self.color == 1 then
             self.tier = self.tier - 1
             self.color = 5
@@ -134,7 +149,11 @@ function Brick:update(dt)
 end
 
 function Brick:render()
-    if self.inPlay then
+    if self.inPlay and self.isLocked then
+        love.graphics.draw(gTextures['main'], 
+            gFrames['bricks'][22], self.x, self.y)
+
+    elseif self.inPlay then
         love.graphics.draw(gTextures['main'], 
             -- multiply color by 4 (-1) to get our color offset, then add tier to that
             -- to draw the correct tier and color brick onto the screen

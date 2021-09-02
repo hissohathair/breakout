@@ -102,6 +102,7 @@ function love.load()
         ['no-select'] = love.audio.newSource('sounds/no-select.wav', 'static'),
         ['brick-hit-1'] = love.audio.newSource('sounds/brick-hit-1.wav', 'static'),
         ['brick-hit-2'] = love.audio.newSource('sounds/brick-hit-2.wav', 'static'),
+        ['brick-hit-locked'] = love.audio.newSource('sounds/brick-hit-locked.wav', 'static'),
         ['hurt'] = love.audio.newSource('sounds/hurt.wav', 'static'),
         ['hurt2'] = love.audio.newSource('sounds/hurt2.wav', 'static'),
         ['victory'] = love.audio.newSource('sounds/victory.wav', 'static'),
@@ -109,6 +110,7 @@ function love.load()
         ['high-score'] = love.audio.newSource('sounds/high_score.wav', 'static'),
         ['pause'] = love.audio.newSource('sounds/pause.wav', 'static'),
         ['powerup'] = love.audio.newSource('sounds/powerup.wav', 'static'),
+        ['unlocked'] = love.audio.newSource('sounds/unlock.wav', 'static'),
 
         ['music'] = love.audio.newSource('sounds/xeon6.ogg', 'static')
     }

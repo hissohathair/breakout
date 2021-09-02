@@ -18,7 +18,7 @@ local ROTATION_SPEED = 0.35
 
 local GOOD_POWERUPS = { 2, 3, 9, 10 }
 local BAD_POWERUPS = { 1, 4 }
-local NUM_GOOD = 4
+local NUM_GOOD = 3
 local NUM_BAD = 2
 
 
@@ -55,28 +55,33 @@ function Powerup:init(x, y)
     self.y = y
     self.width = 16
     self.height = 16
+    self.unlockAllowed = false
 
     -- on init, reset
-    self:reset(self)
+    self:reset(x, y)
 end
 
 --[[
     Called when a brick is spawning a new powerup
 ]]
-function Powerup:reset(brick)
+function Powerup:reset(x, y)
     -- reset powerup's position
-    self.x = brick.x + brick.width / 2
-    self.y = brick.y + brick.height / 2
+    self.x = x
+    self.y = y
     self.rotation = 0
     self.dy = POWERUP_SPEED
-    self.inPlay = true 
+    self.inPlay = true
 
     -- "good" power ups should spawn more often than "bad" ones
     if math.random(9) <= 1 then
         self.skin = BAD_POWERUPS[math.random(NUM_BAD)]
+    elseif self.unlockAllowed then
+        self.skin = GOOD_POWERUPS[math.random(NUM_GOOD + 1)]
     else
         self.skin = GOOD_POWERUPS[math.random(NUM_GOOD)]
     end
+    print(string.format("DEBUG: Chose powerup %d (unlockAllowed=%s)",
+        self.skin, tostring(self.unlockAllowed)))
 
     -- particle system for when powerup hits paddle
     self.psystem = love.graphics.newParticleSystem(gTextures['particle'], 64)
@@ -140,6 +145,11 @@ function Powerup:hit(playState)
         -- takes a life, but doesn't take the last one
         gSounds['hurt2']:play()
         playState.health = math.max(1, playState.health - 1)
+
+    elseif 10 == self.skin then
+        -- enables breaking locks
+        gSounds['unlocked']:play()
+        playState.canBreakLocks = true
 
     elseif 1 == self.skin then
         -- removes all balls except the first one

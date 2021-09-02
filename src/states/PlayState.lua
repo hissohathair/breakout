@@ -39,7 +39,19 @@ function PlayState:enter(params)
     self.balls[1].dy = math.random(-50, -60)
 
     -- no powerups in play yet
-    self.powerup = nil
+    self.powerup = Powerup(VIRTUAL_WIDTH / 2, 0)
+    self.powerup.inPlay = false
+
+    -- are any bricks locked?
+    self.canBreakLocks = false
+    for k, brick in pairs(self.bricks) do
+        if brick.isLocked then
+            self.powerup.unlockAllowed = true
+            break
+        end
+    end
+    print(string.format("DEBUG: unlock power up allowed = %s", 
+        tostring(self.powerup.unlockAllowed)))
 end
 
 function PlayState:update(dt)
@@ -57,7 +69,7 @@ function PlayState:update(dt)
 
     -- TODO: Remove. For testing, hit a key to spawn a powerup
     if love.keyboard.wasPressed('x') then
-        self.powerup = Powerup(self.paddle.x + self.paddle.width / 2, 
+        self.powerup:reset(self.paddle.x + self.paddle.width / 2,
             self.paddle.y - self.paddle.height * 3)
     end
 
@@ -91,11 +103,9 @@ function PlayState:update(dt)
     end
 
     -- update powerup if in play
-    if self.powerup then
-        self.powerup:update(dt)
-        if self.powerup.inPlay and self.powerup:collides(self.paddle) then
-            self.powerup:hit(self)
-        end
+    self.powerup:update(dt)
+    if self.powerup.inPlay and self.powerup:collides(self.paddle) then
+        self.powerup:hit(self)
     end
 
     -- check if any balls have collided with paddle
@@ -133,15 +143,12 @@ function PlayState:update(dt)
                 self.score = self.score + (brick.tier * 200 + brick.color * 25)
 
                 -- trigger the brick's hit function, which removes it from play
-                brick:hit()
+                brick:hit(self.canBreakLocks)
 
                 -- sometimes, a brick will spawn a power up
-                if math.random(3) == 1 then
-                    if not self.powerup then
-                        self.powerup = Powerup(brick.x + brick.width / 2 - 8 / 2, brick.y)
-                    elseif not self.powerup.inPlay then
-                        self.powerup:reset(brick)
-                    end
+                if math.random(3) == 1 and not self.powerup.inPlay then
+                    self.powerup:reset(brick.x + brick.width / 2,
+                        brick.y + brick.height / 2)
                 end
 
                 -- if we have enough points, recover a point of health
@@ -278,10 +285,8 @@ function PlayState:render()
         brick:render()
     end
 
-    -- render powerup if present
-    if self.powerup then
-        self.powerup:render()
-    end
+    -- render powerup
+    self.powerup:render()
 
     -- render all particle systems
     for k, brick in pairs(self.bricks) do

@@ -23,6 +23,9 @@ ALTERNATE = 2       -- alternate colors
 SKIP = 3            -- skip every other block
 NONE = 4            -- no blocks this row
 
+-- when to start "locking" bricks
+MIN_LEVEL_TO_LOCK = 1
+
 LevelMaker = Class{}
 
 --[[
@@ -110,7 +113,14 @@ function LevelMaker.createMap(level)
             if not alternatePattern then
                 b.color = solidColor
                 b.tier = solidTier
-            end 
+            end
+
+            -- lock bricks at random 
+            if level >= MIN_LEVEL_TO_LOCK then
+                if math.random(1, 100) <= level then
+                    b.isLocked = true
+                end
+            end
 
             table.insert(bricks, b)
 
