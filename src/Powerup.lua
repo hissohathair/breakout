@@ -55,7 +55,6 @@ function Powerup:init(x, y)
     self.y = y
     self.width = 16
     self.height = 16
-    self.unlockAllowed = false
 
     -- on init, reset
     self:reset(x, y)
@@ -64,7 +63,7 @@ end
 --[[
     Called when a brick is spawning a new powerup
 ]]
-function Powerup:reset(x, y)
+function Powerup:reset(x, y, unlockAllowed)
     -- reset powerup's position
     self.x = x
     self.y = y
@@ -75,13 +74,11 @@ function Powerup:reset(x, y)
     -- "good" power ups should spawn more often than "bad" ones
     if math.random(9) <= 1 then
         self.skin = BAD_POWERUPS[math.random(NUM_BAD)]
-    elseif self.unlockAllowed then
+    elseif unlockAllowed then
         self.skin = GOOD_POWERUPS[math.random(NUM_GOOD + 1)]
     else
         self.skin = GOOD_POWERUPS[math.random(NUM_GOOD)]
     end
-    print(string.format("DEBUG: Chose powerup %d (unlockAllowed=%s)",
-        self.skin, tostring(self.unlockAllowed)))
 
     -- particle system for when powerup hits paddle
     self.psystem = love.graphics.newParticleSystem(gTextures['particle'], 64)
@@ -196,6 +193,7 @@ function Powerup:hit(playState)
             end
         end
 
+        -- spawn 2 new balls...but sometimes, go crazy...
         local num_new_balls = math.random(100) == 1 and 24 or 2
         while num_new_balls > 0 do
             -- ball spawns at players paddle
@@ -220,6 +218,7 @@ function Powerup:hit(playState)
         -- a powerup we haven't handled! Let's just give points...
         gSounds['powerup']:play()
         playState.score = playState.score + 250
+        print(string.format("ERROR: Unhandled powerup number %d", self.skin))
     end
 end
 
@@ -229,9 +228,6 @@ function Powerup:update(dt)
         -- fall and spin
         self.y = self.y + self.dy * dt
         self.rotation = self.rotation + ROTATION_SPEED * dt
-        if self.rotation > math.pi * 2 then
-            self.rotation = 0 
-        end
 
         -- powerup goes out of play once it drops off screen
         if self.y > VIRTUAL_HEIGHT + self.height then

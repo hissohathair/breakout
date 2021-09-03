@@ -42,16 +42,15 @@ function PlayState:enter(params)
     self.powerup = Powerup(VIRTUAL_WIDTH / 2, 0)
     self.powerup.inPlay = false
 
-    -- are any bricks locked?
+    -- How many bricks are locked? By default, player can't unlock any until
+    -- the "unlock" powerup is caught
     self.canBreakLocks = false
+    self.numLockedBricks = 0
     for k, brick in pairs(self.bricks) do
         if brick.isLocked then
-            self.powerup.unlockAllowed = true
-            break
+            self.numLockedBricks = self.numLockedBricks + 1
         end
     end
-    print(string.format("DEBUG: unlock power up allowed = %s", 
-        tostring(self.powerup.unlockAllowed)))
 end
 
 function PlayState:update(dt)
@@ -70,7 +69,8 @@ function PlayState:update(dt)
     -- TODO: Remove. For testing, hit a key to spawn a powerup
     if love.keyboard.wasPressed('x') then
         self.powerup:reset(self.paddle.x + self.paddle.width / 2,
-            self.paddle.y - self.paddle.height * 3)
+            self.paddle.y - self.paddle.height * 3, 
+            self.numLockedBricks > 0 and not self.canBreakLocks)
     end
 
     -- Check for pause / unpause conditions
@@ -143,12 +143,19 @@ function PlayState:update(dt)
                 self.score = self.score + (brick.tier * 200 + brick.color * 25)
 
                 -- trigger the brick's hit function, which removes it from play
+                wasLocked = brick.isLocked
                 brick:hit(self.canBreakLocks)
+                if wasLocked and not brick.isLocked then
+                    -- locked brick was unlocked
+                    self.numLockedBricks = self.numLockedBricks - 1
+                    self.canBreakLocks = false -- used that power, will need another
+                end
 
                 -- sometimes, a brick will spawn a power up
                 if math.random(3) == 1 and not self.powerup.inPlay then
                     self.powerup:reset(brick.x + brick.width / 2,
-                        brick.y + brick.height / 2)
+                        brick.y + brick.height / 2, 
+                        self.numLockedBricks > 0 and not self.canBreakLocks)
                 end
 
                 -- if we have enough points, recover a point of health
@@ -296,6 +303,7 @@ function PlayState:render()
 
     renderScore(self.score)
     renderHealth(self.health)
+    renderPowerups(self.canBreakLocks)
 
     -- pause text, if paused
     if self.paused then

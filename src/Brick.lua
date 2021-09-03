@@ -119,7 +119,7 @@ function Brick:hit(canUnlock)
     -- if we're at a higher tier than the base, we need to go down a tier
     -- if we're already at the lowest color, else just go down a color
     if self.isLocked then
-        -- remove the lock and reset the tier
+        -- remove the lock and reset the tier/color
         if canUnlock then
             self.isLocked = false
             self.tier = 0

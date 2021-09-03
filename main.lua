@@ -319,6 +319,15 @@ function renderHealth(health)
 end
 
 --[[
+    Shows any relevant powerups a player has (e.g. keys to unlock a locked brick)
+]]
+function renderPowerups(canUnlock)
+    if canUnlock then
+        love.graphics.draw(gTextures['main'], gFrames['powerups'][10], VIRTUAL_WIDTH - 132, 0)
+    end
+end
+
+--[[
     Renders the current FPS.
 ]]
 function displayFPS()
