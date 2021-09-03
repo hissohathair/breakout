@@ -47,6 +47,12 @@ paletteColors = {
         ['r'] = 251,
         ['g'] = 242,
         ['b'] = 54
+    },
+    -- grey rgb(90,86,82)
+    [6] = {
+        ['r'] = 90,
+        ['g'] = 86,
+        ['b'] = 82
     }
 }
 
@@ -113,9 +119,11 @@ function Brick:hit(canUnlock)
     -- if we're at a higher tier than the base, we need to go down a tier
     -- if we're already at the lowest color, else just go down a color
     if self.isLocked then
-        -- something something dark side
+        -- remove the lock and reset the tier
         if canUnlock then
             self.isLocked = false
+            self.tier = 0
+            self.color = 6
         end
 
     elseif self.tier > 0 then
