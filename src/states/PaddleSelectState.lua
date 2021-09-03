@@ -55,10 +55,6 @@ function PaddleSelectState:update(dt)
             recoverPoints = 5000
         })
     end
-
-    if love.keyboard.wasPressed('escape') then
-        love.event.quit()
-    end
 end
 
 function PaddleSelectState:render()

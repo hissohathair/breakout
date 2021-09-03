@@ -20,6 +20,7 @@ function HighScoreState:update(dt)
     -- return to the start screen if we press escape
     if love.keyboard.wasPressed('escape') then
         gSounds['wall-hit']:play()
+        love.keyboard.keysPressed[key] = false
         
         gStateMachine:change('start', {
             highScores = self.highScores

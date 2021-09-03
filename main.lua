@@ -184,6 +184,11 @@ function love.update(dt)
     -- this time, we pass in dt to the state object we're currently using
     gStateMachine:update(dt)
 
+    -- want to be able to quit from anywhere
+    if love.keyboard.wasPressed('escape') then
+        love.event.quit()
+    end
+
     -- reset keys pressed
     love.keyboard.keysPressed = {}
 end

@@ -273,10 +273,6 @@ function PlayState:update(dt)
     for k, brick in pairs(self.bricks) do
         brick:update(dt)
     end
-
-    if love.keyboard.wasPressed('escape') then
-        love.event.quit()
-    end
 end
 
 function PlayState:render()

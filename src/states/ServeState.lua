@@ -52,10 +52,6 @@ function ServeState:update(dt)
             recoverPoints = self.recoverPoints
         })
     end
-
-    if love.keyboard.wasPressed('escape') then
-        love.event.quit()
-    end
 end
 
 function ServeState:render()
