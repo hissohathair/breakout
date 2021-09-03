@@ -102,10 +102,7 @@ function Brick:hit(canUnlock)
     self.psystem:emit(64)
 
     -- sound on hit - if the brick is locked, we doink
-    if self.isLocked and canUnlock then
-        gSounds['unlocked']:stop()
-        gSounds['unlocked']:play()
-    elseif self.isLocked then
+    if self.isLocked and not canUnlock then
         gSounds['brick-hit-locked']:stop()
         gSounds['brick-hit-locked']:play()
     else
