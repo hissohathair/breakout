@@ -2,7 +2,7 @@
 
 CS50G Breakout (Assignment #2)
 
-Original code [by Colton Ogden](https://cs50.harvard.edu/games/2018/projects/1/flappy/)
+Original code [by Colton Ogden](https://cs50.harvard.edu/games/2018/projects/2/breakout/)
 
 Assignment:
 
@@ -26,15 +26,29 @@ Assignment:
 
 ![Image of Powerup](images/powerup2.png)
 
+## Locked Bricks
+
+![Level with locked brick](images/lcokedbrick1.png)
+
+![Unlock Powerup](images/lockedbrick2.png)
+
+## Paddle Sizes
+
+![Large paddle](images/paddlesize2.png)
+
+![Small paddle](images/paddlesize1.png)
+
+
 # Bugs and Todos
 
 * I think the game generates too many lives, some games never seem to end.
 * High scores should be updated after every level instead waiting for the player to lose all lives. If the player quits before losing all lives no high score is recorded.
-* It can be very frustrating when you're down to one brick at the ball consistently misses it...
+* It can be very frustrating when you're down to one brick and the ball consistently misses it...
 * Speaking of frustration, the "increase paddle size" and "decrease paddle size" powerups look very similar...
 
 # Credits
 
+* Most of this code was written [by Colton Ogden](https://cs50.harvard.edu/games/2018/projects/2/breakout/) for the [CS50G EdX course](https://learning.edx.org/course/course-v1:HarvardX+CS50G+Games/home)
 * Background image by [Bart Kelsey](https://opengameart.org/users/bart) via [Open Game Art](https://opengameart.org/content/red-planet-2)
 * Music also by [Bart Kelsey](https://opengameart.org/users/bart) via [Open Game Art](https://opengameart.org/content/xeon-theme-remastered)
 * Using [boon](https://github.com/camchenry/boon) to package releases
