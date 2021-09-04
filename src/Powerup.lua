@@ -16,10 +16,10 @@ Powerup = Class{}
 local POWERUP_SPEED = 30
 local ROTATION_SPEED = 0.35
 
-local GOOD_POWERUPS = { 2, 3, 9, 10 }
-local BAD_POWERUPS = { 1, 4 }
-local NUM_GOOD = 3
-local NUM_BAD = 2
+local GOOD_POWERUPS = { 2, 3, 5, 9, 10 }
+local BAD_POWERUPS = { 1, 4, 6 }
+local NUM_GOOD = 5
+local NUM_BAD = 3
 
 
 local paletteColors = {
@@ -55,15 +55,21 @@ function Powerup:init(x, y)
     self.y = y
     self.width = 16
     self.height = 16
-
-    -- on init, reset
-    self:reset(x, y)
+    self.rotation = 0
+    self.dy = 0
+    self.inPlay = false
+    self.skin = 0
+    self.psystem = nil
 end
 
 --[[
     Called when a brick is spawning a new powerup
+
+    TODO: Don't really like this "options" param -- elsewhere I just pass
+    the whole playState so it's not consistent. OTOH, passing whole playState
+    can obscure the logic/reasonsing behind powerup choices...
 ]]
-function Powerup:reset(x, y, unlockAllowed)
+function Powerup:reset(x, y, options)
     -- reset powerup's position
     self.x = x
     self.y = y
@@ -72,13 +78,35 @@ function Powerup:reset(x, y, unlockAllowed)
     self.inPlay = true
 
     -- "good" power ups should spawn more often than "bad" ones
-    if math.random(9) <= 1 then
-        self.skin = BAD_POWERUPS[math.random(NUM_BAD)]
-    elseif unlockAllowed then
-        self.skin = GOOD_POWERUPS[math.random(NUM_GOOD + 1)]
-    else
-        self.skin = GOOD_POWERUPS[math.random(NUM_GOOD)]
+    local needPowerupChoice = true
+    local sk = 0
+    while needPowerupChoice do
+        -- choose powerup based on simple rules
+        if math.random(9) <= 1 then
+            sk = BAD_POWERUPS[math.random(NUM_BAD)]
+        else
+            sk = GOOD_POWERUPS[math.random(NUM_GOOD)]
+        end
+
+        -- check that we're "happy" with this choice - assume it's OK and
+        -- look for exceptions
+        print(string.format("DEBUG: numBalls=%d", options['numBalls']))
+        needPowerupChoice = false
+        if 10 == sk and not options['needKey'] then
+            needPowerupChoice = true  -- player doesn't need key yet
+        elseif 1 == sk and options['numBalls'] <= 1 then
+            needPowerupChoice = true  -- there's only 1 ball in play
+        elseif 3 == sk and options['health'] >= 3 then
+            needPowerupChoice = true  -- player already has max lives
+        elseif 4 == sk and options['health'] <= 1 then
+            needPowerupChoice = true  -- player down to last life
+        elseif 5 == sk and options['paddleSize'] >= 4 then
+            needPowerupChoice = true  -- player's paddle already at max size
+        elseif 6 == sk and options['paddleSize'] <= 1 then
+            needPowerupChoice = true  -- player's paddle already at min size
+        end
     end
+    self.skin = sk
 
     -- particle system for when powerup hits paddle
     self.psystem = love.graphics.newParticleSystem(gTextures['particle'], 64)
@@ -142,6 +170,16 @@ function Powerup:hit(playState)
         -- takes a life, but doesn't take the last one
         gSounds['hurt2']:play()
         playState.health = math.max(1, playState.health - 1)
+
+    elseif 5 == self.skin then
+        -- paddle gets bigger
+        gSounds['powerup']:play()
+        playState.paddle:reset(playState.paddle.size + 1)
+
+    elseif 6 == self.skin then
+        -- paddle gets smaller
+        gSounds['hurt2']:play()
+        playState.paddle:reset(playState.paddle.size - 1)
 
     elseif 10 == self.skin then
         -- enables breaking locks
@@ -233,7 +271,7 @@ function Powerup:update(dt)
         if self.y > VIRTUAL_HEIGHT + self.height then
             self.inPlay = false
         end
-    else
+    elseif self.psystem then
         self.psystem:update(dt)
     end
 end
@@ -242,7 +280,7 @@ function Powerup:render()
     if self.inPlay then
         love.graphics.draw(gTextures['main'], gFrames['powerups'][self.skin],
             self.x, self.y, self.rotation)
-    else
+    elseif self.psystem then
         love.graphics.draw(self.psystem, self.x, self.y + self.height / 2)
     end
 end

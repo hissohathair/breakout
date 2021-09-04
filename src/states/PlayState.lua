@@ -29,10 +29,10 @@ function PlayState:enter(params)
     self.balls = params.balls
     self.level = params.level
     self.paused = false
-    self.music_paused = false
     self.sleep_enabled = love.window.isDisplaySleepEnabled()
 
-    self.recoverPoints = 5000
+    self.recoverPoints = params.recoverPoints or 5000
+    print(string.format("DEBUG: recoverPoints initialised to %d", self.recoverPoints))
 
     -- give ball random starting velocity
     self.balls[1].dx = math.random(-200, 200)
@@ -55,22 +55,16 @@ end
 
 function PlayState:update(dt)
 
-    -- Let the user turn music off during game play
-    if love.keyboard.wasPressed('m') then
-        if gSounds['music']:isPlaying() then
-            gSounds['music']:pause()
-            self.music_paused = true
-        else
-            gSounds['music']:play()
-            self.music_paused = false
-        end
-    end
-
     -- TODO: Remove. For testing, hit a key to spawn a powerup
     if love.keyboard.wasPressed('x') then
         self.powerup:reset(self.paddle.x + self.paddle.width / 2,
             self.paddle.y - self.paddle.height * 3, 
-            self.numLockedBricks > 0 and not self.canBreakLocks)
+            { 
+                needKey = self.numLockedBricks > 0 and not self.canBreakLocks,
+                health = self.health,
+                paddleSize = self.paddle.size,
+                numBalls = table.getn(self.balls)
+            })
     end
 
     -- Check for pause / unpause conditions
@@ -80,18 +74,16 @@ function PlayState:update(dt)
             -- prevents display from sleeping if that was original setting
             self.paused = false
             gSounds['pause']:play()
-            if not self.music_paused then
-                gSounds['music']:play()
-            end
+            gSounds['music']:setVolume(1)
             love.window.setDisplaySleepEnabled(self.sleep_enabled)
         else
             return
         end
     elseif love.keyboard.wasPressed('space') then
-        -- pausing always pauses music and allows display to sleep
+        -- pausing quietens music and allows display to sleep
         self.paused = true
         gSounds['pause']:play()
-        gSounds['music']:pause()
+        gSounds['music']:setVolume(0.25)
         love.window.setDisplaySleepEnabled(true)
         return
     end
@@ -152,19 +144,28 @@ function PlayState:update(dt)
                 end
 
                 -- sometimes, a brick will spawn a power up
-                if math.random(3) == 1 and not self.powerup.inPlay then
-                    self.powerup:reset(brick.x + brick.width / 2,
-                        brick.y + brick.height / 2, 
-                        self.numLockedBricks > 0 and not self.canBreakLocks)
+                if math.random(3) == 2 and not self.powerup.inPlay then
+                    self.powerup:reset(brick.x + brick.width / 2, brick.y,
+                        { 
+                            needKey = self.numLockedBricks > 0 and not self.canBreakLocks,
+                            health = self.health,
+                            paddleSize = self.paddle.size,
+                            numBalls = table.getn(self.balls)
+                        })
                 end
 
                 -- if we have enough points, recover a point of health
                 if self.score > self.recoverPoints then
+                    print(string.format("DEBUG: score %d > recoverPoints %d", self.score, self.recoverPoints))
                     -- can't go above 3 health
                     self.health = math.min(3, self.health + 1)
 
                     -- multiply recover points by 2
-                    self.recoverPoints = self.recoverPoints + math.min(100000, self.recoverPoints * 2)
+                    self.recoverPoints = self.recoverPoints + math.min(1e6, self.recoverPoints * 2)
+                    print(string.format("DEBUG: next recoverPoints == %d", self.recoverPoints))
+
+                    -- go down a paddle size
+                    self.paddle:reset(self.paddle.size - 1)
 
                     -- play recover sound effect
                     gSounds['recover']:play()
@@ -173,6 +174,11 @@ function PlayState:update(dt)
                 -- go to our victory screen if there are no more bricks left
                 if self:checkVictory() then
                     gSounds['victory']:play()
+
+                    -- paddle gets smaller on victory -- to a point
+                    if self.level > 3 then
+                        self.paddle:reset(self.paddle.size - 1)
+                    end
 
                     gStateMachine:change('victory', {
                         level = self.level,
@@ -263,6 +269,8 @@ function PlayState:update(dt)
                 highScores = self.highScores
             })
         else
+            -- make the paddle bigger
+            self.paddle:reset(self.paddle.size + 1)
             gStateMachine:change('serve', {
                 paddle = self.paddle,
                 bricks = self.bricks,
