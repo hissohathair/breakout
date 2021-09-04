@@ -90,7 +90,6 @@ function Powerup:reset(x, y, options)
 
         -- check that we're "happy" with this choice - assume it's OK and
         -- look for exceptions
-        print(string.format("DEBUG: numBalls=%d", options['numBalls']))
         needPowerupChoice = false
         if 10 == sk and not options['needKey'] then
             needPowerupChoice = true  -- player doesn't need key yet

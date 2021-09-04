@@ -173,8 +173,8 @@ end
     across system hardware.
 ]]
 function love.update(dt)
-    -- TODO: Remove. For taking screenshots for doco
-    if love.keyboard.wasPressed('s') then
+    -- For taking screenshots for doco
+    if DEBUG_MODE and love.keyboard.wasPressed('s') then
         local filename = "Breakout_" .. os.time() .. ".png"
         love.graphics.captureScreenshot(filename)
         savedir = love.filesystem.getSaveDirectory()
@@ -252,7 +252,9 @@ function love.draw()
     gStateMachine:render()
     
     -- display FPS for debugging; simply comment out to remove
-    displayFPS()
+    if DEBUG_MODE then
+        displayFPS()
+    end
     
     push:apply('end')
 end

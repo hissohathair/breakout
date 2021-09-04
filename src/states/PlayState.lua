@@ -32,7 +32,6 @@ function PlayState:enter(params)
     self.sleep_enabled = love.window.isDisplaySleepEnabled()
 
     self.recoverPoints = params.recoverPoints or 5000
-    print(string.format("DEBUG: recoverPoints initialised to %d", self.recoverPoints))
 
     -- give ball random starting velocity
     self.balls[1].dx = math.random(-200, 200)
@@ -55,8 +54,8 @@ end
 
 function PlayState:update(dt)
 
-    -- TODO: Remove. For testing, hit a key to spawn a powerup
-    if love.keyboard.wasPressed('x') then
+    -- For testing, hit a key to spawn a powerup
+    if DEBUG_MODE and love.keyboard.wasPressed('x') then
         self.powerup:reset(self.paddle.x + self.paddle.width / 2,
             self.paddle.y - self.paddle.height * 3, 
             { 
@@ -156,13 +155,11 @@ function PlayState:update(dt)
 
                 -- if we have enough points, recover a point of health
                 if self.score > self.recoverPoints then
-                    print(string.format("DEBUG: score %d > recoverPoints %d", self.score, self.recoverPoints))
                     -- can't go above 3 health
                     self.health = math.min(3, self.health + 1)
 
                     -- multiply recover points by 2
                     self.recoverPoints = self.recoverPoints + math.min(1e6, self.recoverPoints * 2)
-                    print(string.format("DEBUG: next recoverPoints == %d", self.recoverPoints))
 
                     -- go down a paddle size
                     self.paddle:reset(self.paddle.size - 1)
