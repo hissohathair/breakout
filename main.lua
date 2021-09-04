@@ -181,10 +181,20 @@ function love.update(dt)
         print(string.format("DEBUG: Saved screenshot to '%s/%s'", savedir, filename))
     end
 
+    -- Let the user turn music off during game play
+    if love.keyboard.wasPressed('m') then
+        if gSounds['music']:isPlaying() then
+            gSounds['music']:pause()
+        else
+            gSounds['music']:play()
+        end
+    end
+
     -- this time, we pass in dt to the state object we're currently using
     gStateMachine:update(dt)
 
-    -- want to be able to quit from anywhere
+    -- want to be able to quit from anywhere, EXCEPT the highscore screen,
+    -- so we process Escape key presses last
     if love.keyboard.wasPressed('escape') then
         love.event.quit()
     end
