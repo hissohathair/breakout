@@ -10,6 +10,22 @@ Assignment:
 2. ~~Grow and shrink the Paddle when the player gains enough points or loses a life.~~
 3. ~~Add a locked Brick that will only open when the player collects a second new powerup, a key, which should only spawn when such a Brick exists and randomly as per the Ball powerup.~~
 
+Added a few extra things (additional powerups mainly). See `Powerup.lua`.
+
+# Playing
+
+Keys:
+
+* *space*: Pause game
+* *left* and *right* arrows: Move paddle
+* *m*: Pause or play music
+* *escape*: Quit game
+
+Debug keys: (note that `DEBUG_MODE` in `constants.lua` must be `true`)
+
+* *x*: Spawn powerup, just above paddle
+* *s*: Take screenshot (console will log file location)
+
 # Screenshots
 
 ## Opening Screens
@@ -45,7 +61,7 @@ Assignment:
 * I think the game generates too many lives, some games never seem to end.
 * Balance in powerups isn't quite there -- maybe some (like paddle size) should have a timeout.
 * If the player has a "key" powerup and then loses a life the key powerup is lost. Might be OK but hadn't deliberastely coded it that way.
-* High scores should be updated after every level instead waiting for the player to lose all lives. If the player quits before losing all lives no high score is recorded.
+* If the player quits before losing all lives no high score is recorded.
 * It can be very frustrating when you're down to one brick and the ball consistently misses it. Tried to fix this by dropping powerups at random after `BORED_THRESHOLD` seconds.
 * Speaking of frustration, the "increase paddle size" and "decrease paddle size" powerups look very similar...
 
