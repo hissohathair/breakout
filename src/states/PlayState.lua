@@ -16,6 +16,13 @@
 
 PlayState = Class{__includes = BaseState}
 
+-- How many seconds before a player will feel bored because nothing has happened?
+-- (That means no bricks hit, no powerups seen - probably just one ball bouncing
+-- around and missing the last block). If this happens we'll drop a powerup at
+-- random.
+
+local BORED_THRESHOLD = 10
+
 --[[
     We initialize what's in our PlayState via a state table that we pass between
     states as we go from playing to serving.
@@ -32,6 +39,7 @@ function PlayState:enter(params)
     self.sleep_enabled = love.window.isDisplaySleepEnabled()
 
     self.recoverPoints = params.recoverPoints or 5000
+    self.lastAction = love.timer.getTime()
 
     -- give ball random starting velocity
     self.balls[1].dx = math.random(-200, 200)
@@ -62,7 +70,8 @@ function PlayState:update(dt)
                 needKey = self.numLockedBricks > 0 and not self.canBreakLocks,
                 health = self.health,
                 paddleSize = self.paddle.size,
-                numBalls = table.getn(self.balls)
+                numBalls = table.getn(self.balls),
+                level = self.level
             })
     end
 
@@ -72,6 +81,7 @@ function PlayState:update(dt)
             -- unpause resumes music only if it was playing when paused, and
             -- prevents display from sleeping if that was original setting
             self.paused = false
+            self.lastAction = love.timer.getTime()
             gSounds['pause']:play()
             gSounds['music']:setVolume(1)
             love.window.setDisplaySleepEnabled(self.sleep_enabled)
@@ -132,6 +142,7 @@ function PlayState:update(dt)
 
                 -- add to score
                 self.score = self.score + (brick.tier * 200 + brick.color * 25)
+                self.lastAction = love.timer.getTime()
 
                 -- trigger the brick's hit function, which removes it from play
                 wasLocked = brick.isLocked
@@ -149,7 +160,8 @@ function PlayState:update(dt)
                             needKey = self.numLockedBricks > 0 and not self.canBreakLocks,
                             health = self.health,
                             paddleSize = self.paddle.size,
-                            numBalls = table.getn(self.balls)
+                            numBalls = table.getn(self.balls),
+                            level = self.level
                         })
                 end
 
@@ -172,8 +184,10 @@ function PlayState:update(dt)
                 if self:checkVictory() then
                     gSounds['victory']:play()
 
-                    -- paddle gets smaller on victory -- to a point
-                    if self.level > 3 then
+                    -- paddle gets smaller on victory -- after a point
+                    if self.level >= 5 then
+                        self.paddle:reset(1)
+                    elseif self.level >= 2 then
                         self.paddle:reset(self.paddle.size - 1)
                     end
 
@@ -266,8 +280,8 @@ function PlayState:update(dt)
                 highScores = self.highScores
             })
         else
-            -- make the paddle bigger
-            self.paddle:reset(self.paddle.size + 1)
+            -- make the paddle bigger (but not biggest possible)
+            self.paddle:reset(math.min(3, self.paddle.size + 1))
             gStateMachine:change('serve', {
                 paddle = self.paddle,
                 bricks = self.bricks,
@@ -284,6 +298,21 @@ function PlayState:update(dt)
     -- for rendering particle systems
     for k, brick in pairs(self.bricks) do
         brick:update(dt)
+    end
+
+    -- if nothing has happened for "a while" maybe a powerup will help?
+    if love.timer.getTime() - self.lastAction > BORED_THRESHOLD then
+        if math.random(2) == 2 then
+            self.powerup:reset(math.random(32, VIRTUAL_WIDTH - 32), 0,
+                { 
+                    needKey = self.numLockedBricks > 0 and not self.canBreakLocks,
+                    health = self.health,
+                    paddleSize = self.paddle.size,
+                    numBalls = table.getn(self.balls),
+                    level = self.level
+                })
+        end
+        self.lastAction = love.timer.getTime()
     end
 end
 
@@ -306,6 +335,7 @@ function PlayState:render()
         ball:render()
     end
 
+    renderLevel(self.level)
     renderScore(self.score)
     renderHealth(self.health)
     renderPowerups(self.canBreakLocks)
@@ -314,6 +344,14 @@ function PlayState:render()
     if self.paused then
         love.graphics.setFont(gFonts['large'])
         love.graphics.printf("PAUSED", 0, VIRTUAL_HEIGHT / 2 - 16, VIRTUAL_WIDTH, 'center')
+    end
+
+    -- debug text, if in DEBUG_MODE
+    if DEBUG_MODE then
+        love.graphics.setFont(gFonts['small'])
+        love.graphics.setColor(1, 0, 0, 0.8)
+        love.graphics.print(string.format("Recover: %d; BT in %d", 
+            self.recoverPoints, BORED_THRESHOLD - (love.timer.getTime() - self.lastAction)), 50, 5)
     end
 end
 

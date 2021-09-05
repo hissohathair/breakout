@@ -358,3 +358,12 @@ function renderScore(score)
     love.graphics.print('Score:', VIRTUAL_WIDTH - 60, 5)
     love.graphics.printf(tostring(score), VIRTUAL_WIDTH - 50, 5, 40, 'right')
 end
+
+--[[
+    Render the current level top and centre
+]]
+function renderLevel(level)
+    love.graphics.setFont(gFonts['small'])
+    love.graphics.setColor(1, 1, 1, 1)
+    love.graphics.printf(string.format("Level %d", level), VIRTUAL_WIDTH / 2 - 50, 5, 100, 'center') 
+end

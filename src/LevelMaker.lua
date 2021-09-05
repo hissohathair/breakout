@@ -24,7 +24,7 @@ SKIP = 3            -- skip every other block
 NONE = 4            -- no blocks this row
 
 -- when to start "locking" bricks
-MIN_LEVEL_TO_LOCK = 1
+MIN_LEVEL_TO_LOCK = 3
 
 LevelMaker = Class{}
 

@@ -16,10 +16,28 @@ Powerup = Class{}
 local POWERUP_SPEED = 30
 local ROTATION_SPEED = 0.35
 
-local GOOD_POWERUPS = { 2, 3, 5, 9, 10 }
+-- Powerup definitions. Lua doesn't have enumerated type as such, I *think*
+-- this is the idiomatic way of doing it for Lua
+
+local POWERUPS = {
+    REMOVE_BALLS = 1,
+    SPLIT_BALLS = 2,
+    ADD_LIFE = 3,
+    TAKE_LIFE = 4,
+    PADDLE_UP = 5,
+    PADDLE_DOWN = 6,
+    ADD_BALLS = 9,
+    UNLOCK_KEY = 10
+}
+
+-- Powerups are numbered and chosen randomly from the tables below. By 
+-- repeating some of the numbers you can adjust the distribution. See
+-- `reset` below for additional rules applied to what powerups are chosen
+
+local GOOD_POWERUPS = { 2, 3, 5, 9, 10, 10 }
 local BAD_POWERUPS = { 1, 4, 6 }
-local NUM_GOOD = 5
-local NUM_BAD = 3
+local NUM_GOOD = table.getn(GOOD_POWERUPS)
+local NUM_BAD = table.getn(BAD_POWERUPS)
 
 
 local paletteColors = {
@@ -91,17 +109,17 @@ function Powerup:reset(x, y, options)
         -- check that we're "happy" with this choice - assume it's OK and
         -- look for exceptions
         needPowerupChoice = false
-        if 10 == sk and not options['needKey'] then
+        if POWERUPS['UNLOCK_KEY'] == sk and not options['needKey'] then
             needPowerupChoice = true  -- player doesn't need key yet
-        elseif 1 == sk and options['numBalls'] <= 1 then
+        elseif POWERUPS['REMOVE_BALLS'] == sk and options['numBalls'] <= 1 then
             needPowerupChoice = true  -- there's only 1 ball in play
-        elseif 3 == sk and options['health'] >= 3 then
+        elseif POWERUPS['ADD_LIFE'] == sk and options['health'] >= 3 then
             needPowerupChoice = true  -- player already has max lives
-        elseif 4 == sk and options['health'] <= 1 then
+        elseif POWERUPS['TAKE_LIFE'] == sk and options['health'] <= 1 then
             needPowerupChoice = true  -- player down to last life
-        elseif 5 == sk and options['paddleSize'] >= 4 then
-            needPowerupChoice = true  -- player's paddle already at max size
-        elseif 6 == sk and options['paddleSize'] <= 1 then
+        elseif POWERUPS['PADDLE_UP'] == sk and options['paddleSize'] >= (options['level'] >= 6 and 2 or 4) then
+            needPowerupChoice = true  -- player's paddle already big enough for their skill
+        elseif POWERUPS['PADDLE_DOWN'] == sk and options['paddleSize'] <= 1 then
             needPowerupChoice = true  -- player's paddle already at min size
         end
     end
@@ -160,37 +178,51 @@ function Powerup:hit(playState)
     self.psystem:emit(64)
 
     -- execute the powerup based on skin
-    if 3 == self.skin then
+    if POWERUPS['ADD_LIFE'] == self.skin then
         -- add new life
         gSounds['recover']:play()
         playState.health = math.min(3, playState.health + 1)
 
-    elseif 4 == self.skin then
+    elseif POWERUPS['TAKE_LIFE'] == self.skin then
         -- takes a life, but doesn't take the last one
         gSounds['hurt2']:play()
         playState.health = math.max(1, playState.health - 1)
 
-    elseif 5 == self.skin then
+    elseif POWERUPS['PADDLE_UP'] == self.skin then
         -- paddle gets bigger
         gSounds['powerup']:play()
         playState.paddle:reset(playState.paddle.size + 1)
 
-    elseif 6 == self.skin then
+        -- but also, balls speed up a little
+        for k, ball in pairs(playState.balls) do
+            ball.dx = ball.dx * 1.3
+            ball.dy = ball.dy * 1.3
+        end
+
+    elseif POWERUPS['PADDLE_DOWN'] == self.skin then
         -- paddle gets smaller
         gSounds['hurt2']:play()
         playState.paddle:reset(playState.paddle.size - 1)
 
-    elseif 10 == self.skin then
+        -- but also, balls slow down a little
+        for k, ball in pairs(playState.balls) do
+            ball.dx = ball.dx * 0.7
+            ball.dy = ball.dy * 0.7
+        end
+
+    elseif POWERUPS['UNLOCK_KEY'] == self.skin then
         -- enables breaking locks
         gSounds['unlocked']:play()
         playState.canBreakLocks = true
 
-    elseif 1 == self.skin then
-        -- removes all balls except the first one
+    elseif POWERUPS['REMOVE_BALLS'] == self.skin then
+        -- removes all balls except the first one, which will start going "up"
+        -- to give the player a chance to locate the right ball
         gSounds['hurt2']:play()        
         playState.balls = { playState.balls[1] }
+        playState.balls[1].dy = -1 * math.abs(playState.balls[1].dy)
 
-    elseif 2 == self.skin then
+    elseif POWERUPS['SPLIT_BALLS'] == self.skin then
         -- splits all balls into 2
         gSounds['powerup']:play()
         local balls = { }
@@ -216,7 +248,7 @@ function Powerup:hit(playState)
         -- save the new list
         playState.balls = balls 
 
-    elseif 9 == self.skin then
+    elseif POWERUPS['ADD_BALLS'] == self.skin then
         -- 2 new balls, flying off randomly
         gSounds['powerup']:play()
         local balls = { }

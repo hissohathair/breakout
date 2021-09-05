@@ -41,9 +41,12 @@ Assignment:
 
 # Bugs and Todos
 
+* Collision detection between powerups and the paddle is off, probably because I'm rotating the powerup as it falls but not taking that into account in the AABB collision detector. Particularly noticeable when the paddle is small.
 * I think the game generates too many lives, some games never seem to end.
+* Balance in powerups isn't quite there -- maybe some (like paddle size) should have a timeout.
+* If the player has a "key" powerup and then loses a life the key powerup is lost. Might be OK but hadn't deliberastely coded it that way.
 * High scores should be updated after every level instead waiting for the player to lose all lives. If the player quits before losing all lives no high score is recorded.
-* It can be very frustrating when you're down to one brick and the ball consistently misses it...
+* It can be very frustrating when you're down to one brick and the ball consistently misses it. Tried to fix this by dropping powerups at random after `BORED_THRESHOLD` seconds.
 * Speaking of frustration, the "increase paddle size" and "decrease paddle size" powerups look very similar...
 
 # Credits
