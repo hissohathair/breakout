@@ -57,7 +57,7 @@ Debug keys: (note that `DEBUG_MODE` in `constants.lua` must be `true`)
 
 # Bugs and Todos
 
-* Collision detection between powerups and the paddle is off, probably because I'm rotating the powerup as it falls but not taking that into account in the AABB collision detector. Particularly noticeable when the paddle is small.
+* ~~Collision detection between powerups and the paddle is off, probably because I'm rotating the powerup as it falls but not taking that into account in the AABB collision detector. Particularly noticeable when the paddle is small.~~ (Fixed)
 * I think the game generates too many lives, some games never seem to end.
 * Balance in powerups isn't quite there -- maybe some (like paddle size) should have a timeout.
 * If the player has a "key" powerup and then loses a life the key powerup is lost. Might be OK but hadn't deliberastely coded it that way.

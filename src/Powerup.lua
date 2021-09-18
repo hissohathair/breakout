@@ -310,7 +310,7 @@ end
 function Powerup:render()
     if self.inPlay then
         love.graphics.draw(gTextures['main'], gFrames['powerups'][self.skin],
-            self.x, self.y, self.rotation)
+            self.x, self.y, self.rotation, 1, 1, self.width / 2, self.height / 2)
     elseif self.psystem then
         love.graphics.draw(self.psystem, self.x, self.y + self.height / 2)
     end
